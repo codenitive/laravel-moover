@@ -69,18 +69,12 @@ class Schema
 			$options['table']      = $table;
 		}
 
-		$instance = new static;
-		
-		return $instance->run($options);
+		return new static($options);
 	}
-
-	private $table = null;
 	
-	private function run($options)
+	private function __construct($options)
 	{
 		extract($options);
-
-		$this->table = $table;
 
 		if ( ! is_callable($save))
 		{
@@ -127,13 +121,14 @@ class Schema
 	 * Get destination_id based on source_id
 	 *
 	 * @access public
+	 * @param  string   $table
 	 * @param  int      $source_id
 	 * @return int
 	 */
-	public function key($source_id)
+	public function key($table, $source_id)
 	{
 		$result = DB::table('moover_migrations')
-				->where('name', '=', $this->table)
+				->where('name', '=', $table)
 				->where('source_id', '=', $source_id)
 				->first();
 
