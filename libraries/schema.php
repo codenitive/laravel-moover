@@ -32,15 +32,19 @@ class Schema
 	 * @param  mixed    $options
 	 * @return void
 	 */
-	public static function create($id, $options)
+	public static function create($id, $options = null)
 	{
 		$defaults = array(
-			'connection' => static::$connection,
-			'table'      => null,
-			'key'        => 'id',
-			'find'       => null, 
-			'save'       => null,
+			'connection'     => static::$connection,
+			'table'          => null,
+			'key'            => 'id',
+			'find'           => null, 
+			'save'           => null,
+			'ignore_last_id' => false,
 		);
+
+		// Second parameters might be optional for complex migration.
+		if (($id instanceof Closure) or is_array($id)) $options = $id;
 
 		if ($options instanceof Closure)
 		{
@@ -88,7 +92,9 @@ class Schema
 
 		$last_id = (is_null($previous) ? 0 : $previous->source_id);
 
-		$query = DB::connection($connection)->table($table)->where($key, '>', $last_id);
+		$query = DB::connection($connection)->table($table);
+
+		if ( ! $ignore_last_id) $query->where($key, '>', $last_id);
 
 		if (is_callable($find)) $find($query);
 
