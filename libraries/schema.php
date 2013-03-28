@@ -1,6 +1,10 @@
 <?php namespace Moover;
 
-use \Config, \Closure, \DB, \Exception;
+use Closure, 
+	Exception,
+	InvalidArgumentException,
+	Config, 
+	DB;
 
 class Schema 
 {
@@ -44,7 +48,11 @@ class Schema
 		);
 
 		// Second parameters might be optional for complex migration.
-		if (($id instanceof Closure) or is_array($id)) $options = $id;
+		if (($id instanceof Closure) or is_array($id))
+		{
+			$options = $id;
+			$id = null;
+		}
 
 		if ($options instanceof Closure)
 		{
@@ -67,6 +75,11 @@ class Schema
 			{
 				$table      = $id;
 				$connection = $options['connection'] ?: Config::get('database.default');
+			}
+
+			if (empty($table))
+			{
+				throw new InvalidArgumentException("Source table name is not defined.");
 			}
 
 			$options['connection'] = $connection;
